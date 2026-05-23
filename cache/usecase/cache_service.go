@@ -8,6 +8,7 @@ import (
 
 	"github.com/Banner-babaner/proxytools_nice/cache/entity"
 	"github.com/Banner-babaner/proxytools_nice/cache/repository"
+	"github.com/Banner-babaner/proxytools_nice/logger"
 )
 
 type CacheService struct {
@@ -32,15 +33,19 @@ func NewCacheService(
 }
 
 func (cs *CacheService) GetTTL(method, path, host string) time.Duration {
+
 	if !cs.enabled {
 		return 0
 	}
 
+
 	for _, rule := range cs.rules {
 		if rule.Domain != "" && rule.Domain == host {
+			logger.Info(fmt.Sprintf("GetTTL: method=%s path=%s host=%s ttl=%v", method, path, host, rule.TTL))
 			return rule.TTL
 		}
 		if rule.Path != "" && matchPath(rule.Path, path) {
+			logger.Info(fmt.Sprintf("GetTTL: method=%s path=%s host=%s ttl=%v", method, path, host, rule.TTL))
 			return rule.TTL
 		}
 	}
