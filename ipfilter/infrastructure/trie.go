@@ -77,10 +77,14 @@ func (t *IPTrie) Search(ipStr string) (entity.ListType, bool) {
 }
 
 func (t *IPTrie) Insert(cidr string, listType entity.ListType) error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	return t.insert(cidr, listType)
 }
 
+
 func (t *IPTrie) insert(cidr string, listType entity.ListType) error {
+	// Убрать t.mu.Lock() отсюда
 	_, ipNet, err := net.ParseCIDR(cidr)
 	if err != nil {
 		ip := net.ParseIP(cidr)
@@ -89,9 +93,6 @@ func (t *IPTrie) insert(cidr string, listType entity.ListType) error {
 		}
 		ipNet = &net.IPNet{IP: ip, Mask: net.CIDRMask(32, 32)}
 	}
-
-	t.mu.Lock()
-	defer t.mu.Unlock()
 
 	ones, _ := ipNet.Mask.Size()
 	ip := ipNet.IP.To4()
