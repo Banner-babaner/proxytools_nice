@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/Banner-babaner/proxytools_nice/ipfilter/entity"
@@ -92,7 +93,19 @@ func (fs *FilterService) AddIP(ip string, listType string) error {
 		return fmt.Errorf("unknown list type: %s", listType)
 	}
 
-	if err := fs.repo.Insert(ip, lt); err != nil {
+	var err error
+	if strings.Contains(ip, "-") {
+		parts := strings.Split(ip, "-")
+		if len(parts) == 2 {
+			err = fs.repo.InsertRange(parts[0], parts[1], lt)
+		} else {
+			err = fmt.Errorf("invalid range format: %s", ip)
+		}
+	} else {
+		err = fs.repo.Insert(ip, lt)
+	}
+
+	if err != nil {
 		return fmt.Errorf("failed to insert ip %s: %w", ip, err)
 	}
 
@@ -100,10 +113,8 @@ func (fs *FilterService) AddIP(ip string, listType string) error {
 		fs.cache.Remove(ip)
 	}
 
-	logger.Info(fmt.Sprintf("IP %s added to %s", ip, listType))
 	return nil
 }
-
 func (fs *FilterService) RemoveIP(ip string, listType string) {
 	fs.mu.Lock()
 	defer fs.mu.Unlock()
