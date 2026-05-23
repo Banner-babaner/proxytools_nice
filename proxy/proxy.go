@@ -115,6 +115,8 @@ func (ph *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	crw := cacheInfra.NewCacheResponseWriter(w)
 	ph.reverseProxy.ServeHTTP(crw, r)
 
+	logger.Info(fmt.Sprintf("Response: status=%d, body=%d bytes", crw.StatusCode(), len(crw.Body())))
+
 	duration := time.Since(startTime).Seconds()
 
 	uploadSize := r.ContentLength
