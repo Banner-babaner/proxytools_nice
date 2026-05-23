@@ -1,6 +1,8 @@
 package proxy
 
 import (
+	"fmt"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -16,11 +18,11 @@ import (
 )
 
 type ProxyHandler struct {
-	reverseProxy    *httputil.ReverseProxy
-	ipFilter        *filterUsecase.FilterService
-	rateLimiter     *ratelimitUsecase.RateLimitService
-	cacheService    *cacheUsecase.CacheService
-	metrics         *monitorUsecase.MetricsService
+	reverseProxy *httputil.ReverseProxy
+	ipFilter     *filterUsecase.FilterService
+	rateLimiter  *ratelimitUsecase.RateLimitService
+	cacheService *cacheUsecase.CacheService
+	metrics      *monitorUsecase.MetricsService
 }
 
 func NewProxyHandler(
@@ -58,14 +60,20 @@ func (ph *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 	clientIP := r.RemoteAddr
 
-	logger.Info("Checking access for: " + clientIP)
+	if host, _, err := net.SplitHostPort(clientIP); err == nil {
+		clientIP = host
+	}
 
-    access := ph.ipFilter.CheckAccess(clientIP)
-	if access == filterEnt.Denied {
-		logger.Info("Access: denied")
-	} else if access == filterEnt.Allowed {
+	logger.Info(fmt.Sprintf("Checking access for: %s", clientIP))
+
+	access := ph.ipFilter.CheckAccess(clientIP)
+
+	switch access {
+	case filterEnt.Allowed:
 		logger.Info("Access: allowed")
-	} else {
+	case filterEnt.Denied:
+		logger.Info("Access: denied")
+	case filterEnt.CaptchaRequired:
 		logger.Info("Access: captcha")
 	}
 
