@@ -58,7 +58,17 @@ func (ph *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 	clientIP := r.RemoteAddr
 
-	access := ph.ipFilter.CheckAccess(clientIP)
+	logger.Info("Checking access for: " + clientIP)
+
+    access := ph.ipFilter.CheckAccess(clientIP)
+	if access == filterEnt.Denied {
+		logger.Info("Access: denied")
+	} else if access == filterEnt.Allowed {
+		logger.Info("Access: allowed")
+	} else {
+		logger.Info("Access: captcha")
+	}
+
 	if access == filterEnt.Denied {
 		ph.metrics.RecordRequest(false, 0, 0, 0)
 		http.Error(w, "Access denied", http.StatusForbidden)
