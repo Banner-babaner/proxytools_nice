@@ -55,8 +55,8 @@ type RateLimitDefaults struct {
 
 type CacheConfig struct {
     Enabled    bool        `yaml:"enabled"`
-    DefaultTTL int         `yaml:"default_ttl"`
-    MaxSize    int         `yaml:"max_size"`
+    DefaultTTL int64         `yaml:"default_ttl"`
+    MaxSize    int64         `yaml:"max_size"`
     Rules      []CacheRule `yaml:"rules"`
 }
 

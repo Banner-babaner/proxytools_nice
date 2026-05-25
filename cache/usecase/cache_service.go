@@ -8,7 +8,6 @@ import (
 
 	"github.com/Banner-babaner/proxytools_nice/cache/entity"
 	"github.com/Banner-babaner/proxytools_nice/cache/repository"
-	"github.com/Banner-babaner/proxytools_nice/logger"
 )
 
 type CacheService struct {
@@ -19,6 +18,8 @@ type CacheService struct {
 	rules      []entity.CacheRule
 }
 
+
+
 func NewCacheService(
 	cfg entity.CacheConfig,
 	repoBuilder func() repository.CacheRepository,
@@ -26,7 +27,7 @@ func NewCacheService(
 	return &CacheService{
 		repo:       repoBuilder(),
 		enabled:    cfg.Enabled,
-		defaultTTL: cfg.DefaultTTL,
+		defaultTTL:  cfg.DefaultTTL,
 		maxSize:    cfg.MaxSize,
 		rules:      cfg.Rules,
 	}
@@ -41,11 +42,9 @@ func (cs *CacheService) GetTTL(method, path, host string) time.Duration {
 
 	for _, rule := range cs.rules {
 		if rule.Domain != "" && rule.Domain == host {
-			logger.Info(fmt.Sprintf("GetTTL: method=%s path=%s host=%s ttl=%v", method, path, host, rule.TTL))
 			return rule.TTL
 		}
 		if rule.Path != "" && matchPath(rule.Path, path) {
-			logger.Info(fmt.Sprintf("GetTTL: method=%s path=%s host=%s ttl=%v", method, path, host, rule.TTL))
 			return rule.TTL
 		}
 	}

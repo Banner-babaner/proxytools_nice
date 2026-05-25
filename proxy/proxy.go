@@ -55,7 +55,7 @@ func NewProxyHandler(
 
 func (ph *ProxyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ph.metrics.IncrementConnections()
-	defer ph.metrics.DecrementConnections()
+	// defer ph.metrics.DecrementConnections()
 
 	startTime := time.Now()
 	clientIP := r.RemoteAddr
