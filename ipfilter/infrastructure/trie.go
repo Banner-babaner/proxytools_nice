@@ -84,7 +84,6 @@ func (t *IPTrie) Insert(cidr string, listType entity.ListType) error {
 
 
 func (t *IPTrie) insert(cidr string, listType entity.ListType) error {
-	// Убрать t.mu.Lock() отсюда
 	_, ipNet, err := net.ParseCIDR(cidr)
 	if err != nil {
 		ip := net.ParseIP(cidr)
